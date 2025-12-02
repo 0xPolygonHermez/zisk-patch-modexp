@@ -43,7 +43,7 @@ pub fn modexp(base: &[u8], exp: &[u8], modulus: &[u8]) -> Vec<u8> {
     cfg_if::cfg_if! {
         if #[cfg(all(target_os = "zkvm", target_vendor = "zisk"))] {
             let e = mpnat::MPNat::from_big_endian(exp);
-            let result = ziskos::modexp_u64(&x.digits, &e.digits, &m.digits);
+            let result = ziskos::zisklib::modexp_u64(&x.digits, &e.digits, &m.digits);
             let result_mpnat = mpnat::MPNat { digits: result };
             result_mpnat.to_big_endian()
         } else {
