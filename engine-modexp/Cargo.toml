@@ -19,9 +19,6 @@ ibig = { workspace = true, optional = true }
 
 [target.'cfg(all(target_os = "zkvm", target_vendor = "zisk"))'.dependencies]
 cfg-if = "1.0"
-ziskos = { git = "https://github.com/0xPolygonHermez/zisk.git", branch = "feature/modexp" }
-# Local development
-# ziskos = { path = "../../../zisk/ziskos/entrypoint" }
 
 [lints]
 workspace = true

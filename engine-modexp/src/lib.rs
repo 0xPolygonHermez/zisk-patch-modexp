@@ -15,6 +15,19 @@ mod mpnat;
 
 use maybe_std::Vec;
 
+#[cfg(all(target_os = "zkvm", target_vendor = "zisk"))]
+extern "C" {
+    fn modexp_u64_c(
+        base_ptr: *const u64,
+        base_len: usize,
+        exp_ptr: *const u64,
+        exp_len: usize,
+        modulus_ptr: *const u64,
+        modulus_len: usize,
+        result_ptr: *mut u64,
+    ) -> usize;
+}
+
 /// Trait providing the interface for the modexp function.
 /// The implementation provided by this crate is `AuroraModExp` below,
 /// but other users of Aurora Engine may wish to select a different implementation.
@@ -43,7 +56,21 @@ pub fn modexp(base: &[u8], exp: &[u8], modulus: &[u8]) -> Vec<u8> {
     cfg_if::cfg_if! {
         if #[cfg(all(target_os = "zkvm", target_vendor = "zisk"))] {
             let e = mpnat::MPNat::from_big_endian(exp);
-            let result = ziskos::zisklib::modexp_u64(&x.digits, &e.digits, &m.digits);
+            
+            let mut result = m.digits; 
+            let result_len = unsafe {
+                modexp_u64_c(
+                    x.digits.as_ptr(),
+                    x.digits.len(),
+                    e.digits.as_ptr(),
+                    e.digits.len(),
+                    result.as_ptr(),
+                    result.len(),
+                    result.as_mut_ptr(),
+                )
+            };
+            result.truncate(result_len);
+            
             let result_mpnat = mpnat::MPNat { digits: result };
             result_mpnat.to_big_endian()
         } else {
