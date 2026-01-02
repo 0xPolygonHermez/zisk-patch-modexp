@@ -16,9 +16,9 @@ publish = true
 hex.workspace = true
 num.workspace = true
 ibig = { workspace = true, optional = true }
-
-[target.'cfg(all(target_os = "zkvm", target_vendor = "zisk"))'.dependencies]
 cfg-if = "1.0"
+# ziskos = { git = "https://github.com/0xPolygonHermez/zisk.git", tag = "v0.15.0" }
+ziskos = { path = "../../zisk/ziskos/entrypoint" }
 
 [lints]
 workspace = true

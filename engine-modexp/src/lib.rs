@@ -56,8 +56,8 @@ pub fn modexp(base: &[u8], exp: &[u8], modulus: &[u8]) -> Vec<u8> {
     cfg_if::cfg_if! {
         if #[cfg(all(target_os = "zkvm", target_vendor = "zisk"))] {
             let e = mpnat::MPNat::from_big_endian(exp);
-            
-            let mut result = m.digits; 
+
+            let mut result = m.digits;
             let result_len = unsafe {
                 modexp_u64_c(
                     x.digits.as_ptr(),
@@ -70,10 +70,14 @@ pub fn modexp(base: &[u8], exp: &[u8], modulus: &[u8]) -> Vec<u8> {
                 )
             };
             result.truncate(result_len);
-            
+
             let result_mpnat = mpnat::MPNat { digits: result };
             result_mpnat.to_big_endian()
         } else {
+            // Provide modexp hint for ZisK
+            let e = mpnat::MPNat::from_big_endian(exp);
+            ziskos::hints::hint_modexp(x.digits.clone(), e.digits, m.digits.clone());
+
             let result = x.modpow(exp, &m);
             result.to_big_endian()
         }
