@@ -53,30 +53,32 @@ pub fn modexp(base: &[u8], exp: &[u8], modulus: &[u8]) -> Vec<u8> {
     if m.digits.len() == 1 && m.digits[0] == 0 {
         return Vec::new();
     }
-    cfg_if::cfg_if! {
-        if #[cfg(all(target_os = "zkvm", target_vendor = "zisk"))] {
-            let e = mpnat::MPNat::from_big_endian(exp);
-            
-            let mut result = m.digits; 
-            let result_len = unsafe {
-                modexp_u64_c(
-                    x.digits.as_ptr(),
-                    x.digits.len(),
-                    e.digits.as_ptr(),
-                    e.digits.len(),
-                    result.as_ptr(),
-                    result.len(),
-                    result.as_mut_ptr(),
-                )
-            };
-            result.truncate(result_len);
-            
-            let result_mpnat = mpnat::MPNat { digits: result };
-            result_mpnat.to_big_endian()
-        } else {
-            let result = x.modpow(exp, &m);
-            result.to_big_endian()
-        }
+    #[cfg(all(target_os = "zkvm", target_vendor = "zisk"))] 
+    {
+        let e = mpnat::MPNat::from_big_endian(exp);
+        
+        let mut result = m.digits; 
+        let result_len = unsafe {
+            modexp_u64_c(
+                x.digits.as_ptr(),
+                x.digits.len(),
+                e.digits.as_ptr(),
+                e.digits.len(),
+                result.as_ptr(),
+                result.len(),
+                result.as_mut_ptr(),
+            )
+        };
+        result.truncate(result_len);
+        
+        let result_mpnat = mpnat::MPNat { digits: result };
+        result_mpnat.to_big_endian()
+    }
+
+    #[cfg(not(all(target_os = "zkvm", target_vendor = "zisk")))]
+    {
+        let result = x.modpow(exp, &m);
+        result.to_big_endian()
     }
 }
 

@@ -17,9 +17,6 @@ hex.workspace = true
 num.workspace = true
 ibig = { workspace = true, optional = true }
 
-[target.'cfg(all(target_os = "zkvm", target_vendor = "zisk"))'.dependencies]
-cfg-if = "1.0"
-
 [lints]
 workspace = true
 
